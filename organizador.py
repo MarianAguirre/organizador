@@ -24,24 +24,21 @@ def extensiones(carpeta: str) -> List[str]:
 
 def crear_carpetas_por_extension(carpeta: str, extensiones: List[str]):
   for extension in extensiones:
-    os.makedirs(os.path.join(carpeta, extension), exist_ok=True)
+    os.makedirs(os.path.join(carpeta, extension.replace('.', '')), exist_ok=True)
 
 
 def copiar_archivos_a_carpetas(carpeta: str):
     for nombre in archivos_actuales(carpeta):
         ext = pathlib.Path(nombre).suffix or SIN_EXTENSION
         origen = os.path.join(carpeta, nombre)
-        destino = os.path.join(carpeta, ext)
+        destino = os.path.join(carpeta, ext).replace('.', '')
         print(f"Copiando {nombre} a {ext}/")
         shutil.copy(origen, destino)
   
-# def rutasActuales():
-#   rutas: list = []
-#   with os.scandir(carpetaActual) as entries:
-#     for entry in entries:
-#       if entry.is_dir():
-#         rutas.append(entry.path)
-#     return rutas
+def eliminar_archivos(carpeta: str):
+  for nombre in archivos_actuales(carpeta):
+        print(f"Eliminando {nombre}")
+        os.remove(nombre)
   
 
 
@@ -55,13 +52,24 @@ def main():
   if crear == 'si':
         print('Creando carpetas...')
         crear_carpetas_por_extension(carpetaActual, extension)
+  if crear == 'no':
+    print('Fin del programa')
+    return
 
   copiar = input('¿Copiar los archivos a las carpetas correspondientes? (si/no): ').strip().lower()
-  print ('¿Copiamos los archivos a las carpetas correspondientes?')
   if copiar == 'si':
         print('Copiando archivos...')
         copiar_archivos_a_carpetas(carpetaActual)
-          
+  if copiar == 'no':
+    print('Fin del programa')
+    return
+  
+  eliminar = input('¿Eliminar los archivos originales? (si/no): ').strip().lower()
+  if eliminar == 'si':
+        eliminar_archivos(carpetaActual)
+  if eliminar == 'no':
+    print('Fin del programa')
+    return
 
 
 if __name__ == "__main__":
