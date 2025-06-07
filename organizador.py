@@ -74,13 +74,17 @@ class primeraVentana(QWidget):
         
         buttonSi.clicked.connect(self.cambio_a_segunda.emit)
         buttonNo.clicked.connect(self.cambio_a_fin.emit)
+        
+        buttonSi.clicked.connect(lambda:crear_carpetas_por_extension(carpetaActual, extension))
 
         self.setLayout(layout)
 
 class segundaVentana(QWidget):
   cambio_a_fin = pyqtSignal()
   cambio_a_tercera =pyqtSignal()
+  
   def __init__(self):
+        carpetaActual:str = os.getcwd()
         super().__init__()
         label1 = QLabel(f"Creando carpetas...")
         label2 = QLabel(f"¿Copiar los archivos a las carpetas correspondientes?")
@@ -103,6 +107,9 @@ class segundaVentana(QWidget):
         
         buttonNo.clicked.connect(self.cambio_a_fin.emit)
         buttonSi.clicked.connect(self.cambio_a_tercera.emit)
+        
+        buttonSi.clicked.connect(lambda:copiar_archivos_a_carpetas(carpetaActual))
+        
 
         self.setLayout(layout)
 
@@ -111,6 +118,8 @@ class terceraVentana(QWidget):
   cambio_a_cuarta = pyqtSignal()
   
   def __init__(self):
+        carpetaActual:str = os.getcwd()
+
         super().__init__()
         label1 = QLabel(f"Copiando archivos...")
         label2 = QLabel(f"¿Eliminar los archivos originales?")
@@ -135,6 +144,8 @@ class terceraVentana(QWidget):
         
         buttonNo.clicked.connect(self.cambio_a_fin.emit)
         buttonSi.clicked.connect(self.cambio_a_cuarta.emit)
+        
+        buttonSi.clicked.connect(lambda:eliminar_archivos(carpetaActual))
         
 
         self.setLayout(layout)
