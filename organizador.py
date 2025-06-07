@@ -2,7 +2,7 @@ import os
 import pathlib
 import shutil
 from typing import List
-from PyQt6.QtCore import QSize, Qt, pyqtSignal
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, pyqtSlot, QTimer
 from PyQt6.QtWidgets import QApplication, QPushButton, QMainWindow, QLabel, QVBoxLayout, QWidget
 import sys
 
@@ -173,12 +173,18 @@ class finPrograma(QWidget):
   def __init__(self):
     super().__init__()
     labelFin = QLabel("FIN DEL PROGRAMA")
+    label2 = QLabel(f"La ventana se auto cerrara en 3 segundos")
     font = labelFin.font()
+    font2 = label2.font()
     font.setPointSize(30)
+    font2.setPointSize(15)
     labelFin.setFont(font)
-    labelFin.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+    label2.setFont(font2)
+    for lbl in (label2, labelFin):
+      lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
     layout = QVBoxLayout()
     layout.addWidget(labelFin)
+    layout.addWidget(label2)
     self.setLayout(layout)
 
 class main(QMainWindow):
@@ -206,45 +212,27 @@ class main(QMainWindow):
         self.dialogo3.cambio_a_fin.connect(self.mostrar_fin)
         
         
+  @pyqtSlot()
+  def cerrar_ventana(self):
+        self.timer = QTimer(self)
+        self.timer.setSingleShot(True)  
+        self.timer.timeout.connect(self.close)  
+        self.timer.start(3000)
 
+  def closeEvent(self, event):
+        if hasattr(self, 'timer') and self.timer.isActive():
+            self.timer.stop()
+        super().closeEvent(event)
   def mostrar_dialogo2(self):
     self.setCentralWidget(self.dialogo2)
   def mostrar_dialogo3(self):
     self.setCentralWidget(self.dialogo3)
   def mostrar_dialogo4(self):
     self.setCentralWidget(self.dialogo4)
+    self.cerrar_ventana()
   def mostrar_fin(self):
     self.setCentralWidget(self.finPrograma)
-        
-  # carpetaActual:str = os.getcwd()
-  # extension = extensiones(carpetaActual)
-  # print(f'En tu carpeta actual existen {contarArchivos(carpetaActual)} archivos')
-  # print(f'Con las extensiones de {','.join(extension)}')
-  
-  # crear = input('¿Crear carpetas para estos archivos? (si/no): ').strip().lower()
-  # if crear == 'si':
-  #       print('Creando carpetas...')
-  #       crear_carpetas_por_extension(carpetaActual, extension)
-  # if crear == 'no':
-  #   print('Fin del programa')
-  #   return
-
-  # copiar = input('¿Copiar los archivos a las carpetas correspondientes? (si/no): ').strip().lower()
-  # if copiar == 'si':
-  #       print('Copiando archivos...')
-  #       copiar_archivos_a_carpetas(carpetaActual)
-  # if copiar == 'no':
-  #   print('Fin del programa')
-  #   return
-  
-  # eliminar = input('¿Eliminar los archivos originales? (si/no): ').strip().lower()
-  # if eliminar == 'si':
-  #       eliminar_archivos(carpetaActual)
-  # if eliminar == 'no':
-  #   print('Fin del programa')
-  #   return
-
-
+    self.cerrar_ventana()
 
 app = QApplication(sys.argv)
 
