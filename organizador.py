@@ -2,6 +2,9 @@ import os
 import pathlib
 import shutil
 from typing import List
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
+from PyQt6.QtWidgets import QApplication, QPushButton, QMainWindow, QLabel, QVBoxLayout, QWidget
+import sys
 
 SIN_EXTENSION = 'sin_extension'
 
@@ -42,35 +45,198 @@ def eliminar_archivos(carpeta: str):
   
 
 
-def main():
-  carpetaActual:str = os.getcwd()
-  extension = extensiones(carpetaActual)
-  print(f'En tu carpeta actual existen {contarArchivos(carpetaActual)} archivos')
-  print(f'Con las extensiones de {','.join(extension)}')
+class primeraVentana(QWidget):
+  cambio_a_segunda = pyqtSignal()
+  cambio_a_fin = pyqtSignal()
   
-  crear = input('¿Crear carpetas para estos archivos? (si/no): ').strip().lower()
-  if crear == 'si':
-        print('Creando carpetas...')
-        crear_carpetas_por_extension(carpetaActual, extension)
-  if crear == 'no':
-    print('Fin del programa')
-    return
+  def __init__(self):
+        super().__init__()
+        carpetaActual:str = os.getcwd()
+        extension = extensiones(carpetaActual)
+        label1 = QLabel(f"En tu carpeta actual existen {contarArchivos(carpetaActual)} archivos")
+        label2 = QLabel(f"Con las extensiones de {', '.join(extension)}")
+        label3 = QLabel("¿Crear carpetas para estos archivos?")
+        buttonSi = QPushButton("Si")
+        buttonNo = QPushButton("No")
+        
+        font = label1.font()
+        font.setPointSize(16)
+        for lbl in (label1, label2, label3):
+            lbl.setFont(font)
+            lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(label1)
+        layout.addWidget(label2)
+        layout.addWidget(label3)
+        layout.addWidget(buttonSi)
+        layout.addWidget(buttonNo)
+        
+        buttonSi.clicked.connect(self.cambio_a_segunda.emit)
+        buttonNo.clicked.connect(self.cambio_a_fin.emit)
 
-  copiar = input('¿Copiar los archivos a las carpetas correspondientes? (si/no): ').strip().lower()
-  if copiar == 'si':
-        print('Copiando archivos...')
-        copiar_archivos_a_carpetas(carpetaActual)
-  if copiar == 'no':
-    print('Fin del programa')
-    return
+        self.setLayout(layout)
+
+class segundaVentana(QWidget):
+  cambio_a_fin = pyqtSignal()
+  cambio_a_tercera =pyqtSignal()
+  def __init__(self):
+        super().__init__()
+        label1 = QLabel(f"Creando carpetas...")
+        label2 = QLabel(f"¿Copiar los archivos a las carpetas correspondientes?")
+        buttonSi = QPushButton("Si")
+        buttonNo = QPushButton("No")
+        
+        font = label1.font()
+        font.setPointSize(16)
+
+        for lbl in (label1, label2):
+          lbl.setFont(font)
+          lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(label1)
+        layout.addWidget(label2)
+    
+        layout.addWidget(buttonSi)
+        layout.addWidget(buttonNo)
+        
+        buttonNo.clicked.connect(self.cambio_a_fin.emit)
+        buttonSi.clicked.connect(self.cambio_a_tercera.emit)
+
+        self.setLayout(layout)
+
+class terceraVentana(QWidget):
+  cambio_a_fin = pyqtSignal()
+  cambio_a_cuarta = pyqtSignal()
   
-  eliminar = input('¿Eliminar los archivos originales? (si/no): ').strip().lower()
-  if eliminar == 'si':
-        eliminar_archivos(carpetaActual)
-  if eliminar == 'no':
-    print('Fin del programa')
-    return
+  def __init__(self):
+        super().__init__()
+        label1 = QLabel(f"Copiando archivos...")
+        label2 = QLabel(f"¿Eliminar los archivos originales?")
+        
+        buttonSi = QPushButton("Si")
+        buttonNo = QPushButton("No")
+        
+        font = label1.font()
+        font.setPointSize(16)
+
+        for lbl in (label1, label2):
+          lbl.setFont(font)
+          lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(label1)
+        layout.addWidget(label2)
+        
+
+        layout.addWidget(buttonSi)
+        layout.addWidget(buttonNo)
+        
+        buttonNo.clicked.connect(self.cambio_a_fin.emit)
+        buttonSi.clicked.connect(self.cambio_a_cuarta.emit)
+        
+
+        self.setLayout(layout)
+        
+class cuartaVentana(QWidget):
+  def __init__(self):
+        super().__init__()
+        label1 = QLabel(f"Eliminando archivos...")
+        label2 = QLabel(f"La ventana se auto cerrara en 3 segundos")
+        
+        font = label1.font()
+        font.setPointSize(16)
+
+        for lbl in (label1, label2):
+          lbl.setFont(font)
+          lbl.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+        
+        layout = QVBoxLayout()
+        layout.addWidget(label1)
+        layout.addWidget(label2)
+
+        self.setLayout(layout)
+
+class finPrograma(QWidget):
+  def __init__(self):
+    super().__init__()
+    labelFin = QLabel("FIN DEL PROGRAMA")
+    font = labelFin.font()
+    font.setPointSize(30)
+    labelFin.setFont(font)
+    labelFin.setAlignment(Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignVCenter)
+    layout = QVBoxLayout()
+    layout.addWidget(labelFin)
+    self.setLayout(layout)
+
+class main(QMainWindow):
+  def __init__(self):
+        super().__init__()
+        self.setWindowTitle("El  organizainador")
+        self.dialogo1 = primeraVentana()
+        self.dialogo2 = segundaVentana()
+        self.dialogo3 = terceraVentana()
+        self.dialogo4 = cuartaVentana()
+        
+        
+        self.finPrograma = finPrograma()
+        
+        self.setCentralWidget(self.dialogo1)
+        self.setFixedSize(QSize(750, 300))
+
+        # ✅ Conectar señal para cambiar de pantalla
+        self.dialogo1.cambio_a_segunda.connect(self.mostrar_dialogo2)
+        self.dialogo2.cambio_a_tercera.connect(self.mostrar_dialogo3)
+        self.dialogo3.cambio_a_cuarta.connect(self.mostrar_dialogo4)
+        
+        self.dialogo1.cambio_a_fin.connect(self.mostrar_fin)
+        self.dialogo2.cambio_a_fin.connect(self.mostrar_fin)
+        self.dialogo3.cambio_a_fin.connect(self.mostrar_fin)
+        
+        
+
+  def mostrar_dialogo2(self):
+    self.setCentralWidget(self.dialogo2)
+  def mostrar_dialogo3(self):
+    self.setCentralWidget(self.dialogo3)
+  def mostrar_dialogo4(self):
+    self.setCentralWidget(self.dialogo4)
+  def mostrar_fin(self):
+    self.setCentralWidget(self.finPrograma)
+        
+  # carpetaActual:str = os.getcwd()
+  # extension = extensiones(carpetaActual)
+  # print(f'En tu carpeta actual existen {contarArchivos(carpetaActual)} archivos')
+  # print(f'Con las extensiones de {','.join(extension)}')
+  
+  # crear = input('¿Crear carpetas para estos archivos? (si/no): ').strip().lower()
+  # if crear == 'si':
+  #       print('Creando carpetas...')
+  #       crear_carpetas_por_extension(carpetaActual, extension)
+  # if crear == 'no':
+  #   print('Fin del programa')
+  #   return
+
+  # copiar = input('¿Copiar los archivos a las carpetas correspondientes? (si/no): ').strip().lower()
+  # if copiar == 'si':
+  #       print('Copiando archivos...')
+  #       copiar_archivos_a_carpetas(carpetaActual)
+  # if copiar == 'no':
+  #   print('Fin del programa')
+  #   return
+  
+  # eliminar = input('¿Eliminar los archivos originales? (si/no): ').strip().lower()
+  # if eliminar == 'si':
+  #       eliminar_archivos(carpetaActual)
+  # if eliminar == 'no':
+  #   print('Fin del programa')
+  #   return
 
 
-if __name__ == "__main__":
-    main()
+
+app = QApplication(sys.argv)
+
+window = main()
+window.show()  
+app.exec()
